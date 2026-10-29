@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Task Manager</title>
+</head>
+<body>
+  <h1>My Tasks</h1>
+
+  <input id="taskInput" placeholder="Enter a task">
+  <button id="addBtn">Add Task</button>
+
+  <ul id="list"></ul>
+
+  <script>
+    const list = document.getElementById("list");
+    const input = document.getElementById("taskInput");
+    const btn = document.getElementById("addBtn");
+
+    function loadTasks() {
+      fetch("http://localhost:3000/tasks")
+        .then(res => res.json())
+        .then(tasks => {
+          list.innerHTML = "";
+          tasks.forEach(t => {
+            const li = document.createElement("li");
+            li.textContent = t.title + (t.completed ? " ✅" : "");
+            if (!t.completed) {
+              li.style.cursor = "pointer";
+              li.addEventListener("click", () => completeTask(t.id));
+            }
+            list.appendChild(li);
+          });
+        });
+    }
+
+    function completeTask(id) {
+      fetch("http://localhost:3000/tasks/" + id, { method: "PUT" })
+        .then(() => loadTasks());
+    }
+
+    btn.addEventListener("click", () => {
+      const title = input.value.trim();
+      if (!title) return;
+      fetch("http://localhost:3000/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title })
+      }).then(() => {
+        input.value = "";
+        loadTasks();
+      });
+    });
+
+    loadTasks();
+  </script>
+</body>
+</html>
