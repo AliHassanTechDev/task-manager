@@ -24,11 +24,21 @@
           list.innerHTML = "";
           tasks.forEach(t => {
             const li = document.createElement("li");
-            li.textContent = t.title + (t.completed ? " ✅" : "");
+
+            const text = document.createElement("span");
+            text.textContent = t.title + (t.completed ? " ✅" : "");
             if (!t.completed) {
-              li.style.cursor = "pointer";
-              li.addEventListener("click", () => completeTask(t.id));
+              text.style.cursor = "pointer";
+              text.addEventListener("click", () => completeTask(t.id));
             }
+
+            const del = document.createElement("button");
+            del.textContent = "❌";
+            del.style.marginLeft = "10px";
+            del.addEventListener("click", () => deleteTask(t.id));
+
+            li.appendChild(text);
+            li.appendChild(del);
             list.appendChild(li);
           });
         });
@@ -36,6 +46,11 @@
 
     function completeTask(id) {
       fetch("http://localhost:3000/tasks/" + id, { method: "PUT" })
+        .then(() => loadTasks());
+    }
+
+    function deleteTask(id) {
+      fetch("http://localhost:3000/tasks/" + id, { method: "DELETE" })
         .then(() => loadTasks());
     }
 
